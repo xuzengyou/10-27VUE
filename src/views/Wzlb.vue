@@ -52,10 +52,10 @@
                             <router-link to="XFbwz" style="cursor: text;">+</router-link>
                             <router-link to="XFbwz" class="zjia">增加</router-link>
                             <span style="cursor: text;">&minus;</span>
-                            <span class="schu">删除</span>
+                            <span class="schu" @click="Deltr()">删除</span>
                         </div>
                         <div class="lxC">
-                            <div class="lxCo" @click="downth()">
+                            <!-- <div class="lxCo" @click="downth()">
                                 <span>选择栏目</span><span></span>
                             </div>
                             <div class="lxCt" v-show="showth">
@@ -77,7 +77,17 @@
                                 <div class="lxCto">
                                     <span id="5" data-id="#fi">新手学习</span>
                                 </div>
-                            </div>
+                            </div> -->
+                            <el-select v-model="value" placeholder="请选择" @change="change(value)">
+                                <el-option
+                                v-for="item in options"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value"
+                                :dataId="item.dataId"
+                                >
+                                </el-option>
+                            </el-select>
                         </div>
                         <div class="mRott">
                             <span>关键字</span>
@@ -102,58 +112,45 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td><input type="checkbox"></td>
+                                    <tr v-for="item in lists" :key="item.articleId" :id="item.articleId">
+                                        <td>
+                                            <input type="checkbox" :checked="delIds.indexOf(item.articleId)>=0" @click="checkone(item.articleId)"></td>
                                         <td>
                                             <span>
-                                            表单域标签的宽度，作为 Form 直接子元素的
-                                                表单域标签的宽度，作为 Form 直接子元素的
-                                                表单域标签的宽度，作为 Form 直接子元素的
-                                                表单域标签的宽度，作为 Form 直接子元素的
+                                            {{item.title}}
                                             </span>
                                         </td>
-                                        <td>2019-09-10</td>
-                                        <td>财经</td>
-                                        <td>小兰</td>
+                                        <td>{{(item.addTime)|getTime}}</td>
+                                        <td>{{item.sortId}}</td>
+                                        <td>{{item.author}}</td>
                                         <td>
-                                            <router-link to="Fbwz"></router-link>
-                                            <router-link to="Fbwz">编辑</router-link>
-                                            <a href="#"></a>
-                                            <a href="../ZZYM/zzym.html">预览</a>
+                                            <router-link :to="{path:'Fbwz',query:{id:item.articleId}}"></router-link>
+                                            <router-link :to="{path:'Fbwz',query:{id:item.articleId}}">编辑</router-link>
+                                            <a @click="yl(item.articleId,item.tableName,item.httpUrl)" style="cursor:pointer;"></a>
+                                            <a @click="yl(item.articleId,item.tableName,item.httpUrl)" style="cursor:pointer;">预览</a>
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <td><input type="checkbox"></td>
-                                        <td>
-                                            <span>
-                                                表单域标签的宽度，作为 Form 直接子元素的
-                                            </span>
-                                        </td>
-                                        <td>2019-09-10</td>
-                                        <td>财经</td>
-                                        <td>小兰</td>
-                                        <td>
-                                            <a href="#"></a>
-                                            <a href="#">编辑</a>
-                                            <a href="#"></a>
-                                            <a href="../ZZYM/zzym.html">预览</a>
-                                        </td>
-                                    </tr>
-                                    
                                 </tbody>
                                 
                             </table>
                         </div>
                         <div class="mRtt">
                             <div class="mRtto">
-                                <span class="quanx">全选</span>
-                                <span class="qux">取消</span>
+                                <span class="quanx" @click="checkAll()">全选</span>
+                                <span class="qux" @click="checkNo()">取消</span>
                                 <!-- <span>增加属性</span>
                                 <span>删除属性</span> -->
                             </div>
                             <div class="mRttt">
                                 <!-- 分页 -->
-                                <el-pagination background layout="prev, pager, next" :total="20">
+                                <el-pagination
+                                    background
+                                    layout="prev, pager, next"
+                                    :total="total"
+                                    :page-size="21"
+                                    @size-change="handleSizeChange"
+                                    @current-change="handleCurrentChange"
+                                    >
                                 </el-pagination>
                             </div>
                         </div>
@@ -507,12 +504,53 @@
 </template>
 
 <script>
+import Vue from 'vue'
+import Qs from 'qs'
+Vue.filter("getTime",function(val){
+    var time=val.split(" ")[0];
+    return time;
+});
 export default {
   data(){
     return{
         showo:false,
         showt:false,
-        showth:false
+        showth:false,
+        options: [
+            {
+            value: '0',
+            label: '全部文章',
+            dataId:'#z'
+            },{
+            value: '1',
+            label: '财经文章',
+            dataId:'#one'
+            }, {
+            value: '2',
+            label: '股票文章',
+            dataId:'#two'
+            }, {
+            value: '3',
+            label: '外汇文章',
+            dataId:'#three'
+            },{
+            value: '4',
+            label: '幻灯文章',
+            dataId:'#four'
+            }, {
+            value: '5',
+            label: '新手学习',
+            dataId:'#fi'
+            }],
+        value: '',
+        lists:[],
+        delIds:[],
+        total:0,
+        page:1,
+        num:21,
+        currentPage: 1,
+        dq:true,
+        val:0
     }
   },
   methods:{
@@ -528,7 +566,124 @@ export default {
     },
     downth(){
         this.showth=!this.showth;
+    },
+    checkone(articleId){
+        let iddl=this.delIds.indexOf(articleId);
+        if (iddl >= 0) {
+          // 如果已经包含了该id, 则去除(单选按钮由选中变为非选中状态)
+          this.delIds.splice(iddl, 1);
+          console.log(this.delIds)
+        } else {
+          // 选中该checkbox
+          this.delIds.push(articleId);
+          console.log(this.delIds)
+          console.log('啥时候shan')
+        }
+        
+    },
+    checkAll(){
+        console.log(123);
+        // 全选时
+        this.delIds = [];
+        this.lists.forEach(function (item) {
+          this.delIds.push(item.articleId)
+        },this);
+        console.log(this.delIds);
+        // this.fruits.forEach((val,index) =>{
+		// 				this.fruitIds.push(val.fruitId)
+		// 			})
+        //         }else{
+        //             this.fruitIds = []
+        //         }
+    },
+    checkNo(){
+        
+        this.delIds = [];
+        console.log(this.delIds)
+
+    },
+    Deltr(){
+            var arr = [];
+            var len = this.lists.length;
+            for(var i=0;i<len;i++){
+                if(this.delIds.indexOf(this.lists[i].articleId)>=0){
+                    // console.log(this.delIds.indexOf(this.lists[i].id))
+                    // console.log(this.delIds.indexOf(i));
+                    console.log(this.lists[i]);
+                    // arr.push(this.lists[i]);
+                    this.axios.post("/api/WSHD/jiekou6/Delete",Qs.stringify({
+                        id:this.lists[i].articleId
+                    })).then((res)=>{
+                        console.log("删除成功")
+                        
+                    })
+                }else {
+                    // console.log(this.lists[i]);
+                    arr.push(this.lists[i]);
+                }
+            }
+            this.lists = arr;
+            this.delIds = [];
+				
+    },
+    require(){
+        //页面打开发送post请求
+        this.axios.post("/api/WSHD/jiekou6/select",Qs.stringify({
+            page:this.currentPage,
+            num:this.num
+        })).then((res)=>{
+            console.log(res.data)
+            this.lists=res.data.data;
+            this.total=res.data.sum;
+            console.log(this.lists)
+        })
+
+    },
+    handleCurrentChange(currentPage){
+        this.currentPage=currentPage;
+        console.log(this.currentPage);
+        if(this.dq){
+            this.require();
+        }else{
+            this.change(this.val)
+        }
+        
+        
+    },
+    handleSizeChange(size){
+        this.num=size;
+        console.log(this.num)
+    },
+    yl(articleId,tableName,httpUrl){
+        window.location.href=httpUrl+"?aid="+articleId+"&tableName="+tableName;
+        
+    },
+    change(val){
+        // alert(val);
+        if(val==0){
+            window.location.reload();
+        }
+        this.lists=[];
+        this.val=val;
+        //点击具体文章发送post请求
+        this.axios.post("/api/WSHD/jiekou6/selectByType",Qs.stringify({
+            page:this.currentPage,
+            num:this.num,
+            style:this.val
+        })).then((res)=>{
+            console.log(res.data)
+            this.lists=res.data.data;
+            this.total=res.data.sum;
+            this.dq=false;
+            console.log(this.lists);
+            
+        })
     }
+
+
+  },
+  created(){
+   this.require();
   },
   mounted(){
     let usern=sessionStorage.getItem("usern");
@@ -536,8 +691,10 @@ export default {
         console.log(usern);
         document.getElementById("user").innerHTML="你好欢迎"+usern+"登录";
         
-    }
+    };
     
+    
+    // this.change();
   }
 }
 
@@ -554,6 +711,7 @@ export default {
     background-color: #046EB8;
     vertical-align: middle;
     position: fixed;
+    text-align: left;
 }
 .c .head a{
     font-size: 24px;
@@ -563,7 +721,7 @@ export default {
     display: inline-block;
     width: 300px;
     height: 45px;
-    margin-left: 20px;
+    margin-left: 60px;
     /* margin-top: -5px; */
     position: relative;
     top: 10px;
@@ -575,7 +733,7 @@ export default {
 }
 .c .head a:nth-child(2){
     margin-left: 20px;
-    margin-right: 1000px;
+    margin-right: 1100px;
 }
 .c .head a:nth-child(3){
     margin-right: 20px;
@@ -719,7 +877,13 @@ export default {
     /* border: 1px solid #ccc; */
     text-align: center;
     position: relative;
+    height: 30px;
+    overflow: hidden;
 }
+/* #app .c .mainR .mRo .mRot .lxC .el-select .el-input .el-input__inner{
+    height: 30px !important;
+    line-height: 30px !important;
+} */
 .c .mainR .mRo .mRot .lxC .lxCo{
     width: 125px;
     height: 25px;

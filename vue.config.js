@@ -1,4 +1,8 @@
 module.exports = {
+    // 基本路径
+    publicPath: './',
+    // 输出文件目录
+    outputDir: 'dist',
     devServer: {
       port: 8080, // 端口号
       host: "localhost",
@@ -20,5 +24,6 @@ module.exports = {
       } // 配置多个代理
       
     },
-    lintOnSave: false // 关闭eslint代码检查
+    lintOnSave: false ,// 关闭eslint代码检查
+    
   };

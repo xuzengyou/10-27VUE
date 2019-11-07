@@ -14,13 +14,18 @@ Vue.use(Router)
 export default new Router({
   mode: 'history',
   base: process.env.BASE_URL,
+  // base: '/vue/',
   routes: [
     {
-      path: '/',component: login,children:[
-        {path:"/",component:login},
-        {path:"/login",component:login}
-
-      ]},
+      path:"",component:() => import('./views/login.vue')
+    },
+    {
+      path:"/login",component:() => import('./views/login.vue')
+    },
+    {
+      path:"/",component:() => import('./views/login.vue')
+    },
+    
     {
       path: '/Wzlb',component: () => import('./views/Wzlb.vue')
     },
@@ -40,4 +45,5 @@ export default new Router({
 
 
   ]
-})
+});
+
