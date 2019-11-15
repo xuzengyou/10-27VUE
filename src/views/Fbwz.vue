@@ -142,7 +142,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="item in piclists" :key="item.iid">
+                                    <tr v-for="item in piclists" :key="item.iid" :class="{ac:isDelet==true}">
                                         <td>
                                             <input type="checkbox" :checked="delIds.indexOf(item.articleId)>=0" @click="checked(item.iid)">
                                         </td>
@@ -473,6 +473,7 @@ export default {
     },
     checked(articleId){
         this.shangcid=articleId;
+        console.log(this.shangcid)
         let iddl=this.delIds.indexOf(articleId);
         if (iddl >= 0) {
           // 如果已经包含了该id, 则去除(单选按钮由选中变为非选中状态)
@@ -487,39 +488,36 @@ export default {
 
     },
     deleteTr(){
-            var arr = [];
-            var len = this.piclists.length;
-            for(var i=0;i<len;i++){
-                if(this.delIds.indexOf(this.piclists[i].iid)>=0){
-                    // console.log(this.delIds.indexOf(this.lists[i].id))
-                    // console.log(this.delIds.indexOf(i));
-                    //console.log(this.lists[i]);
-                    // arr.push(this.lists[i]);
-                    this.axios.post("/api/WSHD/jiekou7/deleteImage1",Qs.stringify({
-                        folder:this.folderName,
-                        filename:this.imageName
-                    }),
-                    {
-                        headers:{'Content-type':'application/x-www-form-urlencoded; charset=UTF-8'}
-                    }).then((res)=>{
-                        console.log("删除成功")
-                        // window.location.reload()
-                        //普通的文字toast
-                        this.$ftoast({
-                            text: '删除成功！',
-                            background: 'rgba(0, 0, 0, 0)',
-                            textColor: '#fff',
-                            toastBackground: '#ccc',
-                            duration:1000
-                        })
+        var arr = [];
+        var len = this.piclists.length;
+        for(var i=0;i<len;i++){
+            if(this.delIds.indexOf(this.piclists[i].iid)>=0){
+                
+                this.axios.post("/api/WSHD/jiekou7/deleteImage1",Qs.stringify({
+                    folder:this.folderName,
+                    filename:this.imageName
+                }),
+                {
+                    headers:{'Content-type':'application/x-www-form-urlencoded; charset=UTF-8'}
+                }).then((res)=>{
+                    console.log("删除成功")
+                    // window.location.reload()
+                    //普通的文字toast
+                    this.$ftoast({
+                        text: '删除成功！',
+                        background: 'rgba(0, 0, 0, 0)',
+                        textColor: '#fff',
+                        toastBackground: '#ccc',
+                        duration:1000
                     })
-                }else {
-                    // console.log(this.lists[i]);
-                    arr.push(this.piclists[i]);
-                }
+                })
+            }else {
+                // console.log(this.lists[i]);
+                arr.push(this.piclists[i]);
             }
-            this.piclists = arr;
-            this.delIds = [];
+        }
+        this.piclists = arr;
+        this.delIds = [];
 
     },
     showImg(imgsrc,imgeName){
@@ -664,10 +662,11 @@ export default {
             return currentdate;
     },
     deletPic(){
-        var arr = [];
-        var len = this.piclists.length;
-        for(var i=0;i<len;i++){
-            if(this.delIds.indexOf(this.piclists[i].iid)>=0){
+
+        // var arr = [];
+        // var len = this.piclists.length;
+        // for(var i=0;i<len;i++){
+        //     if(this.delIds.indexOf(this.piclists[i].iid)>=0){
                 
                 this.axios.post("/api/WSHD/jiekou7/selectImage1",Qs.stringify({
                     id:this.shangcid
@@ -684,13 +683,13 @@ export default {
                     
 
                 });
-            }else {
-                // console.log(this.lists[i]);
-                arr.push(this.piclists[i]);
-            }
-        }
-        this.piclists = arr;
-        this.delIds = [];
+        //     }else {
+        //         // console.log(this.lists[i]);
+        //         arr.push(this.piclists[i]);
+        //     }
+        // }
+        // this.piclists = arr;
+        // this.delIds = [];
 
 
     }

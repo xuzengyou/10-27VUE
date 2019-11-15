@@ -144,7 +144,7 @@
                                 <tbody>
                                     <tr v-for="item in piclists" :key="item.iid" :class="{ac:isDelet==true}">
                                         <td>
-                                            <input type="checkbox" :checked="delIds.indexOf(item.articleId)>=0" @click="deleteTr(item.iid)">
+                                            <input type="checkbox" :checked="delIds.indexOf(item.articleId)>=0" @click="checked(item.iid)">
                                         </td>
                                         <td>
                                             <span @click="showImg(item.imageUrl,item.imageName)"></span>
@@ -258,7 +258,7 @@ export default {
       num:7,
       showo:false,
       showt:false,
-      showth:false,
+      showth:true,
       id:null,
       src:"",
       titlebt:"",
@@ -381,9 +381,14 @@ export default {
       delIds:[],
       imageName:"",
       shangcid:"",
+      
     }
   },
   methods:{
+    //   showToast () {
+    //     this.$toast()
+    //     console.log(this.$toast())
+    //   },
     sig(){
       window.sessionStorage.clear();
       this.$router.push('login');
@@ -397,26 +402,26 @@ export default {
     downth(){
         this.showth=!this.showth;
     },
-    // load(){
-    //   this.axios.post("/api/WSHD/jiekou6/selectById",Qs.stringify({
-    //     id:this.id
-    //   })).then(res=>{
-    //     console.log(res);
-    //     this.titlebt=res.data.data.title;
-    //     this.thumbsrc=res.data.data.thumb;
-    //     this.msg=res.data.data.content;
-    //     this.recod.aid=this.id;
-    //     this.recod.thumb=res.data.data.thumb;
-    //     this.recod.title=res.data.data.title;
-    //     this.recod.articleId=res.data.data.articleId;
-    //     this.recod.sortId=res.data.data.sortId;
-    //     this.recod.author=res.data.data.author;
-    //     this.recod.copyfrom=res.data.data.copyfrom;
-    //     this.recod.httpUrl=res.data.data.httpUrl;
-    //     this.recod.content=this.msg;
-    //     console.log(this.recod)
-    //   })
-    // },
+    load(){
+      this.axios.post("/api/WSHD/jiekou6/selectById",Qs.stringify({
+        id:this.id
+      })).then(res=>{
+        console.log(res);
+        this.titlebt=res.data.data.title;
+        this.thumbsrc=res.data.data.thumb;
+        this.msg=res.data.data.content;
+        this.recod.aid=this.id;
+        this.recod.thumb=res.data.data.thumb;
+        this.recod.title=res.data.data.title;
+        this.recod.articleId=res.data.data.articleId;
+        this.recod.sortId=res.data.data.sortId;
+        this.recod.author=res.data.data.author;
+        this.recod.copyfrom=res.data.data.copyfrom;
+        this.recod.httpUrl=res.data.data.httpUrl;
+        this.recod.content=this.msg;
+        console.log(this.recod)
+      })
+    },
     loadFolder(){
       this.axios.post("/api/WSHD/jiekou7/selectFolder",Qs.stringify({
 
@@ -486,10 +491,7 @@ export default {
         var len = this.piclists.length;
         for(var i=0;i<len;i++){
             if(this.delIds.indexOf(this.piclists[i].iid)>=0){
-                // console.log(this.delIds.indexOf(this.lists[i].id))
-                // console.log(this.delIds.indexOf(i));
-                //console.log(this.lists[i]);
-                // arr.push(this.lists[i]);
+                
                 this.axios.post("/api/WSHD/jiekou7/deleteImage1",Qs.stringify({
                     folder:this.folderName,
                     filename:this.imageName
@@ -515,6 +517,7 @@ export default {
         }
         this.piclists = arr;
         this.delIds = [];
+
     },
     showImg(imgsrc,imgeName){
       this.ylSrc=imgsrc;
@@ -540,9 +543,9 @@ export default {
         
         reader.readAsDataURL(file);
         //let foldname=this.folderName;
-        console.log(this)
+        //console.log(this)
         var _this=this;
-        console.log(Qs)
+        //console.log(Qs)
         // var _Qs=Qs;
         reader.addEventListener('load',function () {
               var img = document.createElement('img');
@@ -551,8 +554,8 @@ export default {
               _this.uploadimgSrc=img.src;
               console.log(_this.uploadimgSrc)
               // console.log(foldname)
-              console.log(_this);
-              consoel.log(Qs)
+            //   console.log(_this);
+            //   consoel.log(Qs)
               _this.axios.post("/api/WSHD/jiekou7/Image",
                     Qs.stringify({
                       folder:_this.folderName,
@@ -569,7 +572,15 @@ export default {
         
     },
     publishAticle(){
-            if(this.title&&this.sortId){
+        this.axios.post("/api/WSHD/jiekou6/Update",
+        JSON.stringify(
+           this.recod
+        ),
+        {
+            headers:{'Content-type':'application/json; charset=UTF-8'}
+        }).then(res=>{
+            console.log(res)
+            if(res.status==200){
                 setTimeout(()=>{
                     this.$router.push("Wzlb")
                 },1000)
@@ -580,64 +591,53 @@ export default {
                 textColor: '#fff',
                 toastBackground: '#ccc',
                 duration:1000
-                });
-                this.axios.post("/api/WSHD/jiekou6/Create",
-                  JSON.stringify(
-                    this.recod
-                  ),
-                  {
-                      headers:{'Content-type':'application/json; charset=UTF-8'}
-                  }).then(res=>{
-                     
-                  })
-                 
+                })
                 
             }else{
-              
                 //普通的文字toast
                 this.$ftoast({
-                text: '文章标题、文章所属栏目不能为空！',
-                background: 'rgba(0, 0, 0, 0)',
-                textColor: '#fff',
-                toastBackground: '#ccc',
-                duration:3000
+                    text: '发布失败！',
+                    background: 'rgba(0, 0, 0, 0)',
+                    textColor: '#fff',
+                    toastBackground: '#ccc',
+                    duration:1000
                 })
             }
-        // })
+        })
 
 
     },
     publishHD(){
-        if(this.id){
-            setTimeout(()=>{
-                this.$router.push("Wzlb")
-            },1000)
-            //普通的文字toast
-            this.$ftoast({
-            text: '发布幻灯文章成功！',
-            background: 'rgba(0, 0, 0, 0)',
-            textColor: '#fff',
-            toastBackground: '#ccc',
-            duration:1000
-            });
-            this.axios.post("/api/WSHD/jiekou7/huanDengImage",
-            Qs.stringify({
-                style:this.valo,
-                id:this.valt,
-                articleId:this.id
-            })).then(res=>{})
-            
-        }else{
-            //普通的文字toast
-            this.$ftoast({
-            text: '发布失败，请检查输入选项',
-            background: 'rgba(0, 0, 0, 0)',
-            textColor: '#fff',
-            toastBackground: '#C1C1C1',
-            duration:2000
-            })
-        }
-        
+        this.axios.post("/api/WSHD/jiekou7/huanDengImage",
+        Qs.stringify({
+            style:this.valo,
+            id:this.valt,
+            articleId:this.id
+        })).then(res=>{
+            if(res.status==200){
+                setTimeout(()=>{
+                    this.$router.push("Wzlb")
+                },1000)
+                //普通的文字toast
+                this.$ftoast({
+                text: '发布幻灯文章成功！',
+                background: 'rgba(0, 0, 0, 0)',
+                textColor: '#fff',
+                toastBackground: '#ccc',
+                duration:1000
+                })
+                
+            }else{
+                //普通的文字toast
+                this.$ftoast({
+                text: '发布失败！',
+                background: 'rgba(0, 0, 0, 0)',
+                textColor: '#fff',
+                toastBackground: '#ccc',
+                duration:1000
+                })
+            }
+        })
     },
     getNowFormatDate(){
             var date = new Date();
@@ -661,7 +661,6 @@ export default {
             return currentdate;
     },
     deletPic(){
-        // alert(123)
         var arr = [];
         var len = this.piclists.length;
         for(var i=0;i<len;i++){
