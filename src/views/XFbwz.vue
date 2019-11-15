@@ -144,7 +144,7 @@
                                 <tbody>
                                     <tr v-for="item in piclists" :key="item.iid" :class="{ac:isDelet==true}">
                                         <td>
-                                            <input type="checkbox" @click="deleteTr()">
+                                            <input type="checkbox" :checked="delIds.indexOf(item.articleId)>=0" @click="deleteTr(item.iid)">
                                         </td>
                                         <td>
                                             <span @click="showImg(item.imageUrl,item.imageName)"></span>
@@ -173,7 +173,7 @@
                                 <span>上传:</span>
                                 <input type="file" class="shangc" @change="change($event)">
                                 <span class="shanc" @click="deleteTr()">删除图片</span>
-                                <span class="shangch">点击选择图片</span>
+                                <span class="shangch" @click="deletPic()">点击选择图片</span>
                             </div>
                         </div>
                         <div id="yulan" v-show="isshowImg" class="yulan">
@@ -379,7 +379,8 @@ export default {
             content:null
       },
       delIds:[],
-      imageName:""
+      imageName:"",
+      shangcid:"",
     }
   },
   methods:{
@@ -466,6 +467,7 @@ export default {
 
     },
     checked(articleId){
+        this.shangcid=articleId;
         let iddl=this.delIds.indexOf(articleId);
         if (iddl >= 0) {
           // 如果已经包含了该id, 则去除(单选按钮由选中变为非选中状态)
@@ -658,6 +660,38 @@ export default {
             this.updateTime=currentdate;
             return currentdate;
     },
+    deletPic(){
+        // alert(123)
+        var arr = [];
+        var len = this.piclists.length;
+        for(var i=0;i<len;i++){
+            if(this.delIds.indexOf(this.piclists[i].iid)>=0){
+                
+                this.axios.post("/api/WSHD/jiekou7/selectImage1",Qs.stringify({
+                    id:this.shangcid
+                })).then(res=>{
+                    console.log(res);
+                    //普通的文字toast
+                    this.$ftoast({
+                    text: '上传成功！',
+                    background: 'rgba(0, 0, 0, 0)',
+                    textColor: '#fff',
+                    toastBackground: '#ccc',
+                    duration:1000
+                    });
+                    
+
+                });
+            }else {
+                // console.log(this.lists[i]);
+                arr.push(this.piclists[i]);
+            }
+        }
+        this.piclists = arr;
+        this.delIds = [];
+
+
+    }
 
     
   }, //methods结束 
