@@ -52,7 +52,7 @@
                             <span>文章标题</span>
                         </div>
                         <div class="mRott">
-                            <input type="text" placeholder="请输入文章标题" autofocus class="wzbt" v-model="titlebt">
+                            <input type="text" placeholder="请输入文章标题" autofocus class="wzbt" v-model="titlebt" id="bt">
                         </div>
                     </div>
                     <div class="mRoth">
@@ -144,7 +144,7 @@
                                 <tbody>
                                     <tr v-for="item in piclists" :key="item.iid" :class="{ac:isDelet==true}">
                                         <td>
-                                            <input type="checkbox" :checked="delIds.indexOf(item.articleId)>=0" @click="checked(item.iid)">
+                                            <input type="checkbox" :checked="delIds.indexOf(item.articleId)>=0" @click="checked(item.iid,item.imageUrl)">
                                         </td>
                                         <td>
                                             <span @click="showImg(item.imageUrl,item.imageName)"></span>
@@ -346,7 +346,7 @@ export default {
       baseUrl: process.env.NODE_ENV === 'production' ? '/vue-use-tinymce' : '',
       language: 'zh_CN',
       skin: 'oxide',
-      recod:{                  //发布文章
+      record:{                  //发布文章
             aid:null,
             articleId:null,
             sortId:null,
@@ -381,6 +381,7 @@ export default {
       delIds:[],
       imageName:"",
       shangcid:"",
+      selected:"",
       
     }
   },
@@ -410,15 +411,17 @@ export default {
         this.titlebt=res.data.data.title;
         this.thumbsrc=res.data.data.thumb;
         this.msg=res.data.data.content;
-        this.recod.aid=this.id;
-        this.recod.thumb=res.data.data.thumb;
-        this.recod.title=res.data.data.title;
-        this.recod.articleId=res.data.data.articleId;
-        this.recod.sortId=res.data.data.sortId;
-        this.recod.author=res.data.data.author;
-        this.recod.copyfrom=res.data.data.copyfrom;
-        this.recod.httpUrl=res.data.data.httpUrl;
-        this.recod.content=this.msg;
+        this.record.aid=this.id;
+        this.record.thumb=res.data.data.thumb;
+        this.record.title=res.data.data.title;
+        this.record.articleId=res.data.data.articleId;
+        this.record.sortId=res.data.data.sortId;
+        this.record.intro=res.data.data.intro;
+        this.record.author=res.data.data.author;
+        this.record.copyfrom=res.data.data.copyfrom;
+        this.record.httpUrl=res.data.data.httpUrl;
+        this.record.content=this.msg;
+        this.record.updateTime=this.getNowFormatDate();
         console.log(this.recod)
       })
     },
@@ -471,8 +474,9 @@ export default {
       console.log(this.valo+""+this.valt);
 
     },
-    checked(articleId){
+    checked(articleId,imageUrl){
         this.shangcid=articleId;
+        this.selected=imageUrl;
         console.log(this.shangcid)
         let iddl=this.delIds.indexOf(articleId);
         if (iddl >= 0) {
@@ -573,9 +577,13 @@ export default {
         
     },
     publishAticle(){
+        
+        this.record.title=document.getElementById("bt").value;
+        this.record.content=this.msg;
+        console.log(this.recod)
         this.axios.post("/api/WSHD/jiekou6/Update",
         JSON.stringify(
-           this.recod
+           this.record
         ),
         {
             headers:{'Content-type':'application/json; charset=UTF-8'}
@@ -584,7 +592,7 @@ export default {
             if(res.status==200){
                 setTimeout(()=>{
                     this.$router.push("Wzlb")
-                },1000)
+                },1000);
                 //普通的文字toast
                 this.$ftoast({
                 text: '发布普通文章成功！',
@@ -592,7 +600,7 @@ export default {
                 textColor: '#fff',
                 toastBackground: '#ccc',
                 duration:1000
-                })
+                });
                 
             }else{
                 //普通的文字toast
@@ -609,6 +617,9 @@ export default {
 
     },
     publishHD(){
+        this.record.title=document.getElementById("bt").value;
+        this.record.content=this.msg;
+        console.log(this.valo+''+this.valt+''+this.id)
         this.axios.post("/api/WSHD/jiekou7/huanDengImage",
         Qs.stringify({
             style:this.valo,
@@ -667,7 +678,8 @@ export default {
         // var len = this.piclists.length;
         // for(var i=0;i<len;i++){
         //     if(this.delIds.indexOf(this.piclists[i].iid)>=0){
-                
+                console.log(this.shangcid)
+                this.record.thumb=this.selected;
                 this.axios.post("/api/WSHD/jiekou7/selectImage1",Qs.stringify({
                     id:this.shangcid
                 })).then(res=>{

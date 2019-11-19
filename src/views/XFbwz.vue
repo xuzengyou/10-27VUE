@@ -52,7 +52,7 @@
                             <span>文章标题</span>
                         </div>
                         <div class="mRott">
-                            <input type="text" placeholder="请输入文章标题" autofocus class="wzbt" v-model="titlebt">
+                            <input type="text" placeholder="请输入文章标题" autofocus class="wzbt" v-model="titlebt" id="bt">
                         </div>
                     </div>
                     <div class="mRoth">
@@ -90,7 +90,7 @@
                     </div>
                     <div class="mRofi">
                         <div class="mRofio">
-                            <span>幻灯所属栏目</span>
+                            <span>文章所属栏目</span>
                         </div>
                         <div class="c1">
                             <div class="block">
@@ -144,7 +144,7 @@
                                 <tbody>
                                     <tr v-for="item in piclists" :key="item.iid" :class="{ac:isDelet==true}">
                                         <td>
-                                            <input type="checkbox" :checked="delIds.indexOf(item.articleId)>=0" @click="checked(item.iid)">
+                                            <input type="checkbox" :checked="delIds.indexOf(item.articleId)>=0" @click="checked(item.iid,item.imageUrl)">
                                         </td>
                                         <td>
                                             <span @click="showImg(item.imageUrl,item.imageName)"></span>
@@ -223,7 +223,7 @@
                    </div>
                    <div class="mRtf">
                        <button type="button" class="fb" @click="publishAticle()">发布普通文章</button>
-                       <button type="button" class="fbHD" @click="publishHD()">发布幻灯文章</button>
+                       <!-- <button type="button" class="fbHD" @click="publishHD()">发布幻灯文章</button> -->
                    </div>
                 </div>
 
@@ -267,69 +267,16 @@ export default {
       value:"",
       options:[
         {value: '1',
-          label: '财经幻灯1',
-          children:[{
-            value: '1',
-            label: '第一张图片',
-          },{
-            value: '2',
-            label: '第二张图片',
-          },{
-            value: '3',
-            label: '第三张图片',
-          }]
+          label: '财经'
         },
         {value: '2',
-          label: '财经幻灯2',
-          children:[{
-            value: '1',
-            label: '第一张图片',
-          },{
-            value: '2',
-            label: '第二张图片',
-          },{
-            value: '3',
-            label: '第三张图片',
-          }]
+          label: '股票'
         },
         {value: '3',
-          label: '股票幻灯',
-          children:[{
-            value: '1',
-            label: '第一张图片',
-          },{
-            value: '2',
-            label: '第二张图片',
-          },{
-            value: '3',
-            label: '第三张图片',
-          }]
-        },
-        {value: '4',
-          label: '外汇幻灯',
-          children:[{
-            value: '1',
-            label: '第一张图片',
-          },{
-            value: '2',
-            label: '第二张图片',
-          },{
-            value: '3',
-            label: '第三张图片',
-          }]
+          label: '外汇'
         },
         {value: '5',
-          label: '最终页面幻灯',
-          children:[{
-            value: '1',
-            label: '第一张图片',
-          },{
-            value: '2',
-            label: '第二张图片',
-          },{
-            value: '3',
-            label: '第三张图片',
-          }]
+          label: '新手学习'
         }
       ],
       znxz:false,
@@ -346,7 +293,7 @@ export default {
       baseUrl: process.env.NODE_ENV === 'production' ? '/vue-use-tinymce' : '',
       language: 'zh_CN',
       skin: 'oxide',
-      recod:{                  //发布文章
+      record:{                  //发布文章
             aid:null,
             articleId:null,
             sortId:null,
@@ -381,6 +328,8 @@ export default {
       delIds:[],
       imageName:"",
       shangcid:"",
+      selected:"",
+      user:""
       
     }
   },
@@ -402,26 +351,28 @@ export default {
     downth(){
         this.showth=!this.showth;
     },
-    load(){
-      this.axios.post("/api/WSHD/jiekou6/selectById",Qs.stringify({
-        id:this.id
-      })).then(res=>{
-        console.log(res);
-        this.titlebt=res.data.data.title;
-        this.thumbsrc=res.data.data.thumb;
-        this.msg=res.data.data.content;
-        this.recod.aid=this.id;
-        this.recod.thumb=res.data.data.thumb;
-        this.recod.title=res.data.data.title;
-        this.recod.articleId=res.data.data.articleId;
-        this.recod.sortId=res.data.data.sortId;
-        this.recod.author=res.data.data.author;
-        this.recod.copyfrom=res.data.data.copyfrom;
-        this.recod.httpUrl=res.data.data.httpUrl;
-        this.recod.content=this.msg;
-        console.log(this.recod)
-      })
-    },
+    // load(){
+    //   this.axios.post("/api/WSHD/jiekou6/selectById",Qs.stringify({
+    //     id:this.id
+    //   })).then(res=>{
+    //     console.log(res);
+    //     this.titlebt=res.data.data.title;
+    //     this.thumbsrc=res.data.data.thumb;
+    //     this.msg=res.data.data.content;
+    //     this.record.aid=this.id;
+    //     this.record.thumb=res.data.data.thumb;
+    //     this.record.title=res.data.data.title;
+    //     this.record.articleId=res.data.data.articleId;
+    //     this.record.sortId=res.data.data.sortId;
+    //     this.record.intro=res.data.data.intro;
+    //     this.record.author=res.data.data.author;
+    //     this.record.copyfrom=res.data.data.copyfrom;
+    //     this.record.httpUrl=res.data.data.httpUrl;
+    //     this.record.content=this.msg;
+    //     this.record.updateTime=this.getNowFormatDate();
+    //     console.log(this.recod)
+    //   })
+    // },
     loadFolder(){
       this.axios.post("/api/WSHD/jiekou7/selectFolder",Qs.stringify({
 
@@ -467,12 +418,14 @@ export default {
     },
     handleChange(value){
       this.valo=value[0];
-      this.valt=value[1];
-      console.log(this.valo+""+this.valt);
+    //   this.valt=value[1];
+      console.log(value[0]);
 
     },
-    checked(articleId){
+    checked(articleId,imageUrl){
         this.shangcid=articleId;
+        this.selected=imageUrl;
+        console.log(this.shangcid)
         let iddl=this.delIds.indexOf(articleId);
         if (iddl >= 0) {
           // 如果已经包含了该id, 则去除(单选按钮由选中变为非选中状态)
@@ -572,73 +525,96 @@ export default {
         
     },
     publishAticle(){
-        this.axios.post("/api/WSHD/jiekou6/Update",
-        JSON.stringify(
-           this.recod
-        ),
-        {
-            headers:{'Content-type':'application/json; charset=UTF-8'}
-        }).then(res=>{
-            console.log(res)
-            if(res.status==200){
-                setTimeout(()=>{
-                    this.$router.push("Wzlb")
-                },1000)
-                //普通的文字toast
-                this.$ftoast({
-                text: '发布普通文章成功！',
-                background: 'rgba(0, 0, 0, 0)',
-                textColor: '#fff',
-                toastBackground: '#ccc',
-                duration:1000
-                })
-                
-            }else{
-                //普通的文字toast
-                this.$ftoast({
-                    text: '发布失败！',
+        
+        this.record.title=document.getElementById("bt").value;
+        this.record.content=this.msg;
+        this.record.sortId=this.valo;
+        this.record.addTime=this.getNowFormatDate();
+        this.record.updateTime=this.getNowFormatDate();
+        this.record.author=this.user;
+        console.log(this.record);
+        if(this.record.title&&this.record.content&&this.record.sortId){
+
+        
+            this.axios.post("/api/WSHD/jiekou6/Create",
+            JSON.stringify(
+            this.record
+            ),
+            {
+                headers:{'Content-type':'application/json; charset=UTF-8'}
+            }).then(res=>{
+                console.log(res)
+                if(res.status==200){
+                    setTimeout(()=>{
+                        this.$router.push("Wzlb")
+                    },1000);
+                    //普通的文字toast
+                    this.$ftoast({
+                    text: '发布普通文章成功！',
                     background: 'rgba(0, 0, 0, 0)',
                     textColor: '#fff',
                     toastBackground: '#ccc',
                     duration:1000
-                })
-            }
-        })
+                    });
+                    
+                }else{
+                    //普通的文字toast
+                    this.$ftoast({
+                        text: '发布失败！',
+                        background: 'rgba(0, 0, 0, 0)',
+                        textColor: '#fff',
+                        toastBackground: '#ccc',
+                        duration:1000
+                    })
+                }
+            })
+        }else{
+            this.$ftoast({
+                        text: '信息不完整',
+                        background: 'rgba(0, 0, 0, 0)',
+                        textColor: '#fff',
+                        toastBackground: '#ccc',
+                        duration:1000
+                    })
+        }
 
 
     },
-    publishHD(){
-        this.axios.post("/api/WSHD/jiekou7/huanDengImage",
-        Qs.stringify({
-            style:this.valo,
-            id:this.valt,
-            articleId:this.id
-        })).then(res=>{
-            if(res.status==200){
-                setTimeout(()=>{
-                    this.$router.push("Wzlb")
-                },1000)
-                //普通的文字toast
-                this.$ftoast({
-                text: '发布幻灯文章成功！',
-                background: 'rgba(0, 0, 0, 0)',
-                textColor: '#fff',
-                toastBackground: '#ccc',
-                duration:1000
-                })
+    // publishHD(){
+    //     this.record.title=document.getElementById("bt").value;
+    //     this.record.content=this.msg;
+    //     console.log(this.valo+''+this.valt+''+this.id)
+    //     this.axios.post("/api/WSHD/jiekou7/huanDengImage",
+    //     Qs.stringify({
+    //         style:this.valo,
+    //         id:this.valt,
+    //         articleId:this.id
+    //     })).then(res=>{
+    //         if(res.status==200){
+    //             setTimeout(()=>{
+    //                 this.$router.push("Wzlb")
+    //             },1000)
+    //             //普通的文字toast
+    //             this.$ftoast({
+    //             text: '发布幻灯文章成功！',
+    //             background: 'rgba(0, 0, 0, 0)',
+    //             textColor: '#fff',
+    //             toastBackground: '#ccc',
+    //             duration:1000
+    //             })
                 
-            }else{
-                //普通的文字toast
-                this.$ftoast({
-                text: '发布失败！',
-                background: 'rgba(0, 0, 0, 0)',
-                textColor: '#fff',
-                toastBackground: '#ccc',
-                duration:1000
-                })
-            }
-        })
-    },
+    //         }else{
+    //             //普通的文字toast
+    //             this.$ftoast({
+    //             text: '发布失败！',
+    //             background: 'rgba(0, 0, 0, 0)',
+    //             textColor: '#fff',
+    //             toastBackground: '#ccc',
+    //             duration:1000
+    //             })
+    //         }
+    //     })
+    // },
     getNowFormatDate(){
             var date = new Date();
             var seperator1 = "-";
@@ -661,11 +637,13 @@ export default {
             return currentdate;
     },
     deletPic(){
-        var arr = [];
-        var len = this.piclists.length;
-        for(var i=0;i<len;i++){
-            if(this.delIds.indexOf(this.piclists[i].iid)>=0){
-                
+
+        // var arr = [];
+        // var len = this.piclists.length;
+        // for(var i=0;i<len;i++){
+        //     if(this.delIds.indexOf(this.piclists[i].iid)>=0){
+                console.log(this.shangcid)
+                this.record.thumb=this.selected;
                 this.axios.post("/api/WSHD/jiekou7/selectImage1",Qs.stringify({
                     id:this.shangcid
                 })).then(res=>{
@@ -681,13 +659,13 @@ export default {
                     
 
                 });
-            }else {
-                // console.log(this.lists[i]);
-                arr.push(this.piclists[i]);
-            }
-        }
-        this.piclists = arr;
-        this.delIds = [];
+        //     }else {
+        //         // console.log(this.lists[i]);
+        //         arr.push(this.piclists[i]);
+        //     }
+        // }
+        // this.piclists = arr;
+        // this.delIds = [];
 
 
     }
@@ -701,6 +679,7 @@ export default {
   },
   mounted(){
     let usern=sessionStorage.getItem("usern");
+    this.user=usern;
     if(usern){
         console.log(usern);
         document.getElementById("user").innerHTML="你好欢迎"+usern+"登录";
