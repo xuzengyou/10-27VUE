@@ -39,6 +39,9 @@ export default new Router({
       path: '/GGtp',component: () => import('./views/GGtp.vue')
     },
     {
+      path: '/test',component: () => import('.//views/tesr.vue')
+    },
+    {
       path: '/*',component: () => import('./components/NotFoundComponent.vue')
     }
 
